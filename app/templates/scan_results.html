@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% block title %}نتایج {{ target.name }}{% endblock %}
+{% block content %}
+
+{% set phase_labels = {
+    'passive_enum': ('۱', 'جمع‌آوری پسیو'),
+    'dns_resolve': ('۲', 'DNS Resolve'),
+    'tech_detect': ('۳', 'Tech Detect'),
+    'httpx_probe': ('۴', 'HTTPX Probe'),
+    'finalize': ('۵', 'Katana+Wayback'),
+} %}
+
+<div class="eyebrow">تارگت / {{ target.name }}</div>
+<h1>نتایج اسکن</h1>
+
+<div class="card">
+    <div class="card-title-row">
+        <h3>اجرای پایپ‌لاین کامل</h3>
+        <div style="display:flex; gap:8px;">
+            <form method="post" action="/targets/{{ target.id }}/scan/run">
+                <button type="submit" {% if is_running %}disabled{% endif %}>
+                    {% if is_running %}⏳ در حال اجرا...{% else %}▶ اجرای اسکن کامل{% endif %}
+                </button>
+            </form>
+            {% if is_running %}
+            <form method="post" action="/targets/{{ target.id }}/scan/cancel"
+                  onsubmit="return confirm('اسکن در حال اجرا متوقف بشه؟ نتایجی که تا الان پیدا شده حفظ می‌مونه.');">
+                <button type="submit" class="btn-danger">⏹ توقف عملیات</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    <p class="muted">
+        همه‌ی فازها (جمع‌آوری پسیو → DNS Resolve → Tech Detect → HTTPX Probe → Katana/Wayback)
+        به‌صورت خودکار و پشت‌سرهم اجرا می‌شوند؛ نیازی به اجرای دستی هر فاز نیست.
+    </p>
+
+    <div class="pipeline-row">
+        {% for phase in PIPELINE_STEPS %}
+            {% set job = latest_by_phase.get(phase) %}
+            {% set num, label = phase_labels[phase.value] %}
+            <div class="p-step {% if job and job.status.value == 'success' %}success{% elif job and job.status.value == 'running' %}running{% elif job and job.status.value == 'failed' %}failed{% elif job and job.status.value == 'cancelled' %}cancelled{% endif %}">
+                <div class="circle">{{ num }}</div>
+                <div class="p-label">{{ label }}</div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="card">
+    <h3>خروجی گرفتن از نتایج</h3>
+    <p class="muted">هر دسته را جدا، به‌صورت متن (tab-separated) یا HTML دانلود کن.</p>
+    <table>
+        <tr><th>دسته</th><th>متن (txt)</th><th>HTML</th></tr>
+        <tr>
+            <td>ساب‌دامین‌ها</td>
+            <td><a class="btn btn-secondary btn-sm" href="/targets/{{ target.id }}/export/subdomains.txt">⬇ txt</a></td>
+            <td><a class="btn btn-secondary btn-sm" href="/targets/{{ target.id }}/export/subdomains.html">⬇ html</a></td>
+        </tr>
+        <tr>
+            <td>نتایج HTTPX</td>
+            <td><a class="btn btn-secondary btn-sm" href="/targets/{{ target.id }}/export/httpx.txt">⬇ txt</a></td>
+            <td><a class="btn btn-secondary btn-sm" href="/targets/{{ target.id }}/export/httpx.html">⬇ html</a></td>
+        </tr>
+        <tr>
+            <td>تکنولوژی (Tech-Detect)</td>
+            <td><a class="btn btn-secondary btn-sm" href="/targets/{{ target.id }}/export/techdetect.txt">⬇ txt</a></td>
+            <td><a class="btn btn-secondary btn-sm" href="/targets/{{ target.id }}/export/techdetect.html">⬇ html</a></td>
+        </tr>
+        <tr>
+            <td>URLها (Katana+Wayback)</td>
+            <td><a class="btn btn-secondary btn-sm" href="/targets/{{ target.id }}/export/urls.txt">⬇ txt</a></td>
+            <td><a class="btn btn-secondary btn-sm" href="/targets/{{ target.id }}/export/urls.html">⬇ html</a></td>
+        </tr>
+    </table>
+</div>
+
+<div class="card">
+    <div class="card-title-row"><h3>وضعیت فازها</h3>
+        <a class="btn btn-secondary btn-sm" href="/targets/{{ target.id }}/results">🔄 رفرش</a>
+    </div>
+    {% if not jobs %}
+        <div class="empty-state">هنوز اسکنی اجرا نشده. از دکمه بالا شروع کن.</div>
+    {% else %}
+    <table>
+        <tr><th>فاز</th><th>وضعیت</th><th>شروع</th><th>پایان</th><th>لاگ</th></tr>
+        {% for phase in PIPELINE_STEPS %}
+        {% set j = latest_by_phase.get(phase) %}
+        {% if j %}
+        <tr>
+            <td>{{ phase_labels[phase.value][1] }}</td>
+            <td>
+                {% if j.status.value == 'success' %}<span class="badge badge-ok">موفق</span>
+                {% elif j.status.value == 'failed' %}<span class="badge badge-fail">خطا</span>
+                {% elif j.status.value == 'cancelled' %}<span class="badge badge-cancelled">لغو شد</span>
+                {% elif j.status.value == 'running' %}<span class="badge badge-running">در حال اجرا</span>
+                {% else %}<span class="badge badge-pending">در صف</span>{% endif %}
+            </td>
+            <td class="muted mono">{{ j.started_at.strftime("%H:%M:%S") if j.started_at else "-" }}</td>
+            <td class="muted mono">{{ j.finished_at.strftime("%H:%M:%S") if j.finished_at else "-" }}</td>
+            <td class="muted" style="max-width:320px; white-space:pre-wrap; font-size:11.5px;">{{ (j.log or "")[-300:] }}</td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+    </table>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h3>ساب‌دامین‌ها ({{ subdomains|length }})</h3>
+    {% if not subdomains %}
+        <div class="empty-state">هنوز ساب‌دامینی پیدا نشده.</div>
+    {% else %}
+    <table class="sortable">
+        <thead><tr><th data-type="text">نام</th><th data-type="text">منبع</th><th data-type="text">ریزالو شده</th><th data-type="text">IP</th><th data-type="text">اولین مشاهده</th></tr></thead>
+        <tbody>
+        {% for s in subdomains %}
+        <tr>
+            <td class="mono">{{ s.name }}</td>
+            <td class="muted mono">{{ s.source }}</td>
+            <td>{{ "✅" if s.resolved else "—" }}</td>
+            <td class="muted mono">{{ s.ip or "-" }}</td>
+            <td class="muted">{{ s.first_seen.strftime("%Y-%m-%d") }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h3>نتایج HTTPX ({{ httpx_results|length }})</h3>
+    {% if not httpx_results %}
+        <div class="empty-state">هنوز نتیجه‌ای از HTTPX Probe نیست.</div>
+    {% else %}
+    <table class="sortable">
+        <thead><tr>
+            <th data-type="text">ساب‌دامین</th><th data-type="num">پورت</th><th data-type="num">Status</th>
+            <th data-type="text">تایتل</th><th data-type="text">Content-Type</th><th data-type="text">تکنولوژی</th>
+            <th data-type="text">IP</th><th data-type="text">وب‌سرور</th>
+        </tr></thead>
+        <tbody>
+        {% for h in httpx_results %}
+        <tr>
+            <td class="mono">
+                {{ h.subdomain }}
+                {% if h.is_new %}<span class="badge badge-new">NEW</span>{% endif %}
+                {% if h.content_changed %}<span class="badge badge-changed">CHANGED</span>{% endif %}
+            </td>
+            <td class="mono">{{ h.port }}</td>
+            <td class="mono">{{ h.status_code }}</td>
+            <td>{{ h.title }}</td>
+            <td class="muted">{{ h.content_type }}</td>
+            <td class="muted">{{ h.tech }}</td>
+            <td class="muted mono">{{ h.ip }}</td>
+            <td class="muted">{{ h.webserver }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h3>Tech-Detect (Nuclei) — آخرین ۲۰۰ مورد</h3>
+    {% if not tech_results %}
+        <div class="empty-state">هنوز یافته‌ای ثبت نشده.</div>
+    {% else %}
+    <table class="sortable">
+        <thead><tr><th data-type="text">هاست</th><th data-type="text">Template</th><th data-type="text">جزئیات</th></tr></thead>
+        <tbody>
+        {% for t in tech_results %}
+        <tr>
+            <td class="mono">{{ t.host }}</td>
+            <td class="muted mono">{{ t.matched_template }}</td>
+            <td class="muted">{{ t.info }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h3>URL نهایی (Katana + Wayback) — آخرین ۵۰۰ مورد</h3>
+    {% if not final_urls %}
+        <div class="empty-state">هنوز URL‌ای پیدا نشده.</div>
+    {% else %}
+    <table class="sortable">
+        <thead><tr><th data-type="text">URL</th><th data-type="text">منبع</th></tr></thead>
+        <tbody>
+        {% for u in final_urls %}
+        <tr>
+            <td class="mono" style="word-break:break-all;">{{ u.url }}</td>
+            <td class="muted">{{ u.source }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+
+<script>
+document.querySelectorAll('table.sortable').forEach(function (table) {
+    var thead = table.querySelector('thead');
+    var tbody = table.querySelector('tbody');
+    if (!thead || !tbody) return;
+    var ths = thead.querySelectorAll('th');
+    ths.forEach(function (th, idx) {
+        th.style.cursor = 'pointer';
+        th.title = 'برای مرتب‌سازی کلیک کن';
+        th.dataset.dir = '';
+        th.addEventListener('click', function () {
+            var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+            var asc = th.dataset.dir !== 'asc';
+            ths.forEach(function (t) { t.dataset.dir = ''; t.classList.remove('sort-asc', 'sort-desc'); });
+            th.dataset.dir = asc ? 'asc' : 'desc';
+            th.classList.add(asc ? 'sort-asc' : 'sort-desc');
+            var type = th.dataset.type || 'text';
+            rows.sort(function (r1, r2) {
+                var c1 = (r1.children[idx] ? r1.children[idx].innerText : '').trim();
+                var c2 = (r2.children[idx] ? r2.children[idx].innerText : '').trim();
+                if (type === 'num') {
+                    var n1 = parseFloat(c1.replace(/[^0-9.\-]/g, ''));
+                    var n2 = parseFloat(c2.replace(/[^0-9.\-]/g, ''));
+                    if (isNaN(n1)) n1 = -Infinity;
+                    if (isNaN(n2)) n2 = -Infinity;
+                    return asc ? n1 - n2 : n2 - n1;
+                }
+                return asc ? c1.localeCompare(c2, 'fa') : c2.localeCompare(c1, 'fa');
+            });
+            rows.forEach(function (r) { tbody.appendChild(r); });
+        });
+    });
+});
+</script>
+{% endblock %}

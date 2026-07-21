@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}ورود{% endblock %}
+{% block content %}
+<div class="card auth-card">
+    <div class="brand"><span class="dot"></span> Rasad</div>
+    <h2 style="text-align:center;">ورود به پنل</h2>
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
+    <form method="post" action="/login">
+        <input type="text" name="username" placeholder="نام کاربری" required>
+        <input type="password" name="password" placeholder="رمز عبور" required>
+        <button type="submit" style="width:100%; justify-content:center;">ورود</button>
+    </form>
+    <p class="muted" style="text-align:center; margin-top:14px;">حساب نداری؟ <a href="/register">ثبت‌نام کن</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}ثبت‌نام{% endblock %}
+{% block content %}
+<div class="card auth-card">
+    <div class="brand"><span class="dot"></span> Rasad</div>
+    <h2 style="text-align:center;">ساخت حساب کاربری</h2>
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
+    <form method="post" action="/register">
+        <input type="text" name="username" placeholder="نام کاربری" required>
+        <input type="email" name="email" placeholder="ایمیل" required>
+        <input type="password" name="password" placeholder="رمز عبور" required>
+        <input type="password" name="password_confirm" placeholder="تکرار رمز عبور" required>
+        <button type="submit" style="width:100%; justify-content:center;">ثبت‌نام</button>
+    </form>
+    <p class="muted" style="text-align:center; margin-top:14px;">حساب داری؟ <a href="/login">وارد شو</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}تارگت‌ها | Rasad{% endblock %}
+{% block content %}
+<div class="eyebrow">فضای کاری</div>
+<h1>تارگت‌های من</h1>
+
+{% if error %}<div class="error">{{ error }}</div>{% endif %}
+
+<div class="grid-2">
+    <div class="card">
+        <h3>افزودن تارگت جدید</h3>
+        <form method="post" action="/targets/add">
+            <input type="text" name="name" placeholder="نام تارگت (مثلا program-name یا example.com)" required>
+            <button type="submit">+ افزودن تارگت</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h3>وضعیت اشتراک</h3>
+        <p style="margin:4px 0;">
+            پلن فعلی: <span class="badge-plan">{{ user.plan.name if user.plan else "بدون پلن" }}</span>
+        </p>
+        {% if user.plan %}
+        <div class="quota-bar">
+            <div class="quota-bar-fill {% if targets|length >= user.plan.max_targets %}full{% endif %}"
+                 style="width: {{ ((targets|length / user.plan.max_targets) * 100) if user.plan.max_targets else 100 }}%;"></div>
+        </div>
+        <p class="muted" style="margin-top:6px;">{{ targets|length }} از {{ user.plan.max_targets }} تارگت استفاده شده</p>
+        {% endif %}
+        <p class="muted">
+            انقضا:
+            {% if user.subscription_expires_at %}{{ user.subscription_expires_at.strftime("%Y-%m-%d") }}
+            {% else %}بدون انقضا{% endif %}
+        </p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title-row"><h3>لیست تارگت‌ها</h3></div>
+    {% if not targets %}
+        <div class="empty-state">هنوز تارگتی اضافه نکرده‌ای.</div>
+    {% else %}
+    <table>
+        <tr><th>نام</th><th>تاریخ ایجاد</th><th>عملیات</th></tr>
+        {% for t in targets %}
+        <tr>
+            <td class="mono"><a href="/targets/{{ t.id }}">{{ t.name }}</a></td>
+            <td class="muted">{{ t.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+            <td>
+                <a class="btn btn-secondary btn-sm" href="/targets/{{ t.id }}/scope">اسکوپ</a>
+                <a class="btn btn-secondary btn-sm" href="/targets/{{ t.id }}/results">نتایج</a>
+                <form method="post" action="/targets/{{ t.id }}/delete" style="display:inline"
+                      onsubmit="return confirm('حذف این تارگت و همه‌ی داده‌هایش قطعی است. مطمئنی؟');">
+                    <button type="submit" class="btn-danger btn-sm">حذف</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+</div>
+{% endblock %}

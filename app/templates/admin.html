@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}پنل ادمین | کاربران{% endblock %}
+{% block content %}
+<div class="eyebrow">پنل ادمین</div>
+<h1>کاربران وب‌اپلیکیشن</h1>
+<p class="section-sub">{{ users|length }} کاربر ثبت‌شده</p>
+
+<div class="card">
+    <table>
+        <tr>
+            <th>کاربر</th>
+            <th>ایمیل</th>
+            <th>تارگت‌ها</th>
+            <th>وضعیت</th>
+            <th>پلن / انقضا</th>
+            <th>عملیات</th>
+        </tr>
+        {% for u in users %}
+        <tr>
+            <td>
+                <span class="mono">{{ u.username }}</span>
+                {% if u.is_admin %}<span class="badge-admin">ADMIN</span>{% endif %}
+                <br><span class="muted">{{ u.created_at.strftime("%Y-%m-%d") }}</span>
+            </td>
+            <td class="muted">{{ u.email }}</td>
+            <td class="mono">{{ target_counts.get(u.id, 0) }}{% if u.plan %} / {{ u.plan.max_targets }}{% endif %}</td>
+            <td>
+                {% if u.is_active %}<span class="badge badge-ok">فعال</span>
+                {% else %}<span class="badge-banned">مسدود</span>{% endif %}
+                {% if u.subscription_expires_at and u.subscription_expires_at < now %}
+                    <br><span class="badge badge-changed" style="margin-top:4px;">منقضی</span>
+                {% endif %}
+            </td>
+            <td>
+                <form method="post" action="/admin/users/{{ u.id }}/plan" class="inline-form">
+                    <select name="plan_id" style="min-width:110px; margin-bottom:0;">
+                        <option value="">— بدون پلن —</option>
+                        {% for p in plans %}
+                        <option value="{{ p.id }}" {% if u.plan_id == p.id %}selected{% endif %}>{{ p.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="date" name="expires_at" style="margin-bottom:0; min-width:135px;"
+                           value="{{ u.subscription_expires_at.strftime('%Y-%m-%d') if u.subscription_expires_at else '' }}">
+                    <button type="submit" class="btn-sm">ثبت</button>
+                </form>
+            </td>
+            <td>
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <form method="post" action="/admin/users/{{ u.id }}/toggle_active">
+                        <button type="submit" class="btn-secondary btn-sm" {% if u.id == user.id %}disabled{% endif %}>
+                            {{ "رفع مسدودیت" if not u.is_active else "مسدودسازی" }}
+                        </button>
+                    </form>
+                    <form method="post" action="/admin/users/{{ u.id }}/toggle_admin">
+                        <button type="submit" class="btn-secondary btn-sm" {% if u.id == user.id %}disabled{% endif %}>
+                            {{ "حذف ادمین" if u.is_admin else "ادمین کن" }}
+                        </button>
+                    </form>
+                    <form method="post" action="/admin/users/{{ u.id }}/delete"
+                          onsubmit="return confirm('حذف کامل این کاربر و همه‌ی داده‌هایش قطعی است. مطمئنی؟');">
+                        <button type="submit" class="btn-danger btn-sm" {% if u.id == user.id %}disabled{% endif %}>حذف</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

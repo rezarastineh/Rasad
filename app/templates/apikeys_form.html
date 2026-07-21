@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}API Key ها{% endblock %}
+{% block content %}
+<div class="eyebrow">تنظیمات حساب</div>
+<h1>API Key های من</h1>
+<p class="section-sub">این کلیدها فقط برای اکانت شما ذخیره می‌شوند و در اسکن تارگت‌های شما استفاده می‌شوند.</p>
+
+<div class="card">
+    <form method="post" action="/apikeys">
+        <div class="eyebrow" style="margin-top:0">سورس‌های subfinder + ابزارهای مستقل</div>
+        <p class="section-sub">
+            این کلیدها همزمان دو جا استفاده می‌شوند: هم در provider-config.yaml اختصاصی که برای
+            subfinder شما ساخته می‌شود، هم (در مورد GitHub/Shodan) در ابزارهای مستقل
+            github-subdomains و shosubgo.
+        </p>
+        <div class="grid-2">
+            <div>
+                <label>Chaos API Key</label>
+                <input type="text" name="chaos" value="{{ existing.get('chaos', '') }}">
+            </div>
+            <div>
+                <label>GitHub Token (سورس github در subfinder + ابزار github-subdomains)</label>
+                <input type="text" name="github_subdomains" value="{{ existing.get('github_subdomains', '') }}">
+            </div>
+            <div>
+                <label>Shodan API Key (سورس shodan در subfinder + ابزار shosubgo)</label>
+                <input type="text" name="shodan" value="{{ existing.get('shodan', '') }}">
+            </div>
+            <div>
+                <label>BeVigil API Key</label>
+                <input type="text" name="bevigil" value="{{ existing.get('bevigil', '') }}">
+            </div>
+            <div>
+                <label>DigitalYama API Key</label>
+                <input type="text" name="digitalyama" value="{{ existing.get('digitalyama', '') }}">
+            </div>
+            <div>
+                <label>PugRecon API Key</label>
+                <input type="text" name="pugrecon" value="{{ existing.get('pugrecon', '') }}">
+            </div>
+            <div>
+                <label>ZoomEye API Key (zoomeyeapi)</label>
+                <input type="text" name="zoomeyeapi" value="{{ existing.get('zoomeyeapi', '') }}">
+            </div>
+            <div>
+                <label>FOFA Email</label>
+                <input type="text" name="fofa_email" value="{{ existing.get('fofa_email', '') }}" placeholder="you@example.com">
+            </div>
+            <div>
+                <label>FOFA API Key</label>
+                <input type="text" name="fofa_key" value="{{ existing.get('fofa_key', '') }}">
+            </div>
+        </div>
+
+        <div class="eyebrow" style="margin-top:24px">ابزارهای خارج از subfinder</div>
+        <div class="grid-2">
+            <div>
+                <label>C99.nl API Key</label>
+                <input type="text" name="c99" value="{{ existing.get('c99', '') }}">
+            </div>
+            <div>
+                <label>Censys API ID</label>
+                <input type="text" name="censys_id" value="{{ existing.get('censys_id', '') }}">
+            </div>
+            <div>
+                <label>Censys API Secret</label>
+                <input type="text" name="censys_secret" value="{{ existing.get('censys_secret', '') }}">
+            </div>
+        </div>
+        <button type="submit">💾 ذخیره</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}پنل ادمین | پلن‌ها{% endblock %}
+{% block content %}
+<div class="eyebrow">پنل ادمین</div>
+<h1>مدیریت پلن‌های اشتراک</h1>
+
+{% if error %}<div class="error">{{ error }}</div>{% endif %}
+
+<div class="grid-2">
+    <div class="card">
+        <h3>افزودن پلن جدید</h3>
+        <form method="post" action="/admin/plans/add">
+            <label>نام پلن</label>
+            <input type="text" name="name" placeholder="مثلا Pro" required>
+            <label>حداکثر تعداد تارگت</label>
+            <input type="text" name="max_targets" value="3" required>
+            <label>حداکثر اسکن هم‌زمان</label>
+            <input type="text" name="max_concurrent_scans" value="1" required>
+            <label style="display:flex; align-items:center; gap:6px;">
+                <input type="checkbox" name="is_default" value="true" style="width:auto; margin:0;">
+                پلن پیش‌فرض برای کاربرهای تازه‌ثبت‌نامی
+            </label>
+            <button type="submit" style="margin-top:10px;">+ افزودن پلن</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h3>پلن‌های موجود</h3>
+        {% if not plans %}
+            <div class="empty-state">هنوز پلنی تعریف نشده.</div>
+        {% else %}
+        <table>
+            <tr><th>نام</th><th>سقف تارگت</th><th>سقف اسکن هم‌زمان</th><th>پیش‌فرض</th><th></th></tr>
+            {% for p in plans %}
+            <tr>
+                <td class="mono">{{ p.name }}</td>
+                <td class="mono">{{ p.max_targets }}</td>
+                <td class="mono">{{ p.max_concurrent_scans }}</td>
+                <td>{{ "✅" if p.is_default else "—" }}</td>
+                <td>
+                    <form method="post" action="/admin/plans/{{ p.id }}/delete"
+                          onsubmit="return confirm('حذف این پلن؟ کاربرهایی که این پلن رو دارن بدون پلن می‌شن.');">
+                        <button type="submit" class="btn-danger btn-sm">حذف</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

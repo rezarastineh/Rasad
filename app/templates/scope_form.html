@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}اسکوپ {{ target.name }}{% endblock %}
+{% block content %}
+<div class="eyebrow">تارگت / {{ target.name }}</div>
+<h1>مدیریت اسکوپ</h1>
+<p class="section-sub">هر خط یک مقدار. ثبت فرم، لیست قبلی هر بخش را جایگزین می‌کند.</p>
+
+<form method="post" action="/targets/{{ target.id }}/scope">
+    <div class="grid-3">
+        <div class="card">
+            <h3>🟢 در اسکوپ — وایلدکارت</h3>
+            <p class="muted">روی این‌ها فاز جمع‌آوری ساب‌دامین انجام می‌شود. مثال: <code>example.com</code> یا <code>*.example.com</code></p>
+            <textarea name="in_scope_wildcard" placeholder="example.com&#10;*.example.com">{% for e in in_scope_wildcard %}{{ e.entry }}
+{% endfor %}</textarea>
+        </div>
+        <div class="card">
+            <h3>🔵 دامنه‌های عادی</h3>
+            <p class="muted">دامنه‌های مشخص که نیازی به enumeration ندارند و مستقیم به لیست اضافه می‌شوند.</p>
+            <textarea name="normal_domain" placeholder="api.example.com">{% for e in normal_domain %}{{ e.entry }}
+{% endfor %}</textarea>
+        </div>
+        <div class="card">
+            <h3>🔴 خارج از اسکوپ</h3>
+            <p class="muted">این دامنه‌ها و زیرمجموعه‌هایشان از نتایج حذف می‌شوند.</p>
+            <textarea name="out_of_scope" placeholder="internal.example.com">{% for e in out_of_scope %}{{ e.entry }}
+{% endfor %}</textarea>
+        </div>
+    </div>
+    <button type="submit">💾 ذخیره اسکوپ</button>
+    <a class="btn btn-secondary" href="/targets/{{ target.id }}">↩ بازگشت</a>
+</form>
+{% endblock %}

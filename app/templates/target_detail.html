@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ target.name }}{% endblock %}
+{% block content %}
+<div class="eyebrow">تارگت</div>
+<h1 class="mono">{{ target.name }}</h1>
+<div class="card">
+    <a class="btn" href="/targets/{{ target.id }}/scope">🎯 مدیریت اسکوپ</a>
+    <a class="btn btn-secondary" href="/targets/{{ target.id }}/results">📊 مشاهده نتایج و اجرای اسکن</a>
+    <a class="btn btn-secondary" href="/dashboard">↩ بازگشت به داشبورد</a>
+</div>
+{% endblock %}
