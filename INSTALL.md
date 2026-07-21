@@ -117,7 +117,7 @@ cd /opt/rasad
 cp .env.example .env
 nano .env
 ```
-حتماً `SUBSPYDER_DB_PASSWORD` رو با یه پسورد قوی و رندوم عوض کن، و همون مقدار رو دقیقاً توی `docker-compose.yml` هم زیر `POSTGRES_PASSWORD` بذار:
+حتماً `Rasad_DB_PASSWORD` رو با یه پسورد قوی و رندوم عوض کن، و همون مقدار رو دقیقاً توی`docker-compose.yml` هم زیر `POSTGRES_PASSWORD` بذار:
 ```bash
 nano docker-compose.yml
 ```
