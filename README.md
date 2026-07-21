@@ -20,67 +20,6 @@
 
 اگه اشتراک کسی منقضی یا غیرفعال بشه، دیگه نمی‌تونه تارگت جدید اضافه کنه یا اسکن جدید بزنه — ولی تارگت‌ها و نتایج قبلیش همچنان قابل مشاهده می‌مونه.
 
-### ساخت اولین ادمین
-
-از داخل خود سایت نمی‌شه کسی رو ادمین کرد؛ این کار عمداً فقط از خط فرمان روی سرور ممکنه، تا یک کاربر عادی نتونه خودش رو ادمین کنه:
-
-```bash
-source venv/bin/activate
-python -m app.create_admin --username admin --email admin@example.com
-# رمز عبور رو ازت می‌پرسه (یا با --password هم می‌شه داد)
-```
-
-اگه یوزرنیمی که دادی از قبل وجود داشته باشه، فقط ادمینش می‌کنه (و اگه `--password` هم بدی رمزش عوض می‌شه)، وگرنه یک کاربر ادمین جدید می‌سازه.
-
-## پیش‌نیازها روی VPS
-
-این ابزارهای CLI باید از قبل نصب و در `PATH` باشن. هرکدوم نبود، همون بخش خودکار skip می‌شه و توی لاگ جاب هم گزارش می‌شه:
-
-```
-subfinder, chaos, assetfinder, findomain, amass, shuffledns, massdns,
-asnmap, naabu, httpx, nuclei, anew, katana, waybackurls,
-shosubgo, github-subdomains, jq, curl
-dnsx (اختیاری — اگه نصب باشه، ستون IP هر ساب‌دامین توی فاز DNS Resolve پر می‌شه)
-```
-
-بعلاوه:
-- Python 3.11+
-- PostgreSQL (یا از `docker-compose.yml` پیوست استفاده کن)
-- Redis (برای Celery)
-
-## نصب
-
-```bash
-git clone <your-repo> subspyder && cd subspyder
-python3 -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-
-cp .env.example .env
-# مقادیر .env رو ویرایش کن و SUBSPYDER_SECRET_KEY رو حتما به یک مقدار تصادفی طولانی تغییر بده
-
-# اگه Postgres/Redis نداری:
-docker compose up -d
-```
-
-متغیرهای `.env` رو قبل از اجرا export کن یا با `export $(cat .env | xargs)` بارگذاری کن (یا اگه خواستی خودت python-dotenv اضافه کن).
-
-## اجرا
-
-```bash
-# ۱) وب‌سرور
-uvicorn app.main:app --host 0.0.0.0 --port 8000
-
-# ۲) ورکر Celery (توی ترمینال جدا)
-celery -A app.celery_app worker --loglevel=info
-
-# ۳) فقط بار اول: ساخت ادمین
-python -m app.create_admin --username admin --email admin@example.com
-```
-
-بعدش برو به `http://<ip-vps>:8000`:
-
-- به‌عنوان کاربر عادی: ثبت‌نام کن، تارگت بساز، اسکوپ رو وارد کن (خارج از اسکوپ / وایلدکارت داخل اسکوپ / دامنه‌ی عادی)، از بخش «API Key ها» کلیدهای شخصی خودت رو وارد کن، و از صفحه‌ی نتایج روی «اجرای اسکن کامل» بزن — هر ۵ فاز خودکار پشت سر هم اجرا می‌شن.
-- به‌عنوان ادمین (بعد از لاگین با اکانتی که با `create_admin` ساختی): از سایدبار برو توی «کاربران» یا «پلن‌ها».
 
 ## کلیدهای API و provider-config.yaml خودِ subfinder
 
