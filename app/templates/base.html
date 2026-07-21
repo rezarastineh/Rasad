@@ -47,17 +47,13 @@
     <main>
         {% block content_noauth %}{{ self.content() }}{% endblock %}
     </main>
-    {% endif %}
-
-    {% else %}
-    <main>
-        {% block content_noauth %}{{ self.content() }}{% endblock %}
-    </main>
     <footer class="auth-footer" style="text-align:center; padding:16px; font-size:13px; opacity:0.7;">
         طراحی و توسعه توسط <strong>Mrx</strong> | 
         <a href="https://t.me/R_Mrx" target="_blank">Mrx</a>
     </footer>
     {% endif %}
+</body>
+</html>
 
 
 </body>
