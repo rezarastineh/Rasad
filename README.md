@@ -92,7 +92,7 @@ python -m app.create_admin --username admin --email admin@example.com
 
 هر بار فاز اول (جمع‌آوری پسیو) اجرا می‌شه، تابع `build_subfinder_provider_config` توی `app/tasks/tool_utils.py` از روی کلیدهای ذخیره‌شده‌ی همون کاربر یک فایل `subfinder-provider-config.yaml` اختصاصی می‌سازه (داخل workspace همون کاربر/تارگت) و با فلگ `-pc` به subfinder می‌ده. یعنی لازم نیست کسی دستی فایل `~/.config/subfinder/provider-config.yaml` رو روی سرور ویرایش کنه؛ هر کاربر کلیدهای خودش رو از پنل وارد می‌کنه. اگه کاربری هیچ‌کدوم از این کلیدها رو وارد نکرده باشه، این فایل اصلاً ساخته نمی‌شه و subfinder فقط با سورس‌های بدون کلید (crtsh، hackertarget، ...) اجرا می‌شه.
 
-shosubgo (ابزار جدا برای گرفتن ساب‌دامین از Shodan) از قبل توی فاز اول یکپارچه‌ست — همون کلید Shodan که توی پنل وارد می‌کنی هم برای سورس `shodan` توی subfinder و هم برای اجرای `shosubgo -d <domain> -s <key>` استفاده می‌شه. اگه باینری `shosubgo` روی سرور نصب و در `PATH` نباشه، اون بخش خودکار skip می‌شه.
+ابزارshosubgo (ابزار جدا برای گرفتن ساب‌دامین از Shodan) از قبل توی فاز اول یکپارچه‌ست — همون کلید Shodan که توی پنل وارد می‌کنی هم برای سورس `shodan` توی subfinder و هم برای اجرای `shosubgo -d <domain> -s <key>` استفاده می‌شه. اگه باینری `shosubgo` روی سرور نصب و در `PATH` نباشه، اون بخش خودکار skip می‌شه.
 
 
 ## نکات امنیتی
